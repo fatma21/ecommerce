@@ -1,0 +1,69 @@
+name: Ecommerce Advanced CI
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches: [ main, master ]
+
+jobs:
+  code-governance:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. سحب الكود
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # مهمة جداً عشان يقرأ تاريخ الـ commits كلها ويقيس عليها
+
+      # 2. تجهيز فلاتر
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # ----- المعيار 1: الـ Linting -----
+      - name: 1. Check Code Linting
+        run: flutter analyze
+
+      # ----- المعيار 2: تسمية الملفات snake_case -----
+      - name: 2. Enforce Snake Case File Names
+        run: |
+          echo "Checking file naming conventions in lib/..."
+          invalid_files=$(find lib -name "*[A-Z]*" -name "*.dart" 2>/dev/null)
+          if [ ! -z "$invalid_files" ]; then
+            echo "❌ ERROR: File names must be snake_case (lowercase with underscores). Fix these:"
+            echo "$invalid_files"
+            exit 1
+          else
+            echo "✅ All file names are strictly snake_case!"
+          fi
+
+      # ----- المعيار 3: اختبار الـ Commits (لو فيه push) -----
+      - name: 3. Validate Commit Messages
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: .commitlintrc.json
+          failOnWarnings: false
+
+  # ----- المعيار 4: اختبار عنوان الـ PR (بيشتغل بس لو فتحتي PR) -----
+  pr-title-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 4. Validate PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            style
+            refactor
+            test
