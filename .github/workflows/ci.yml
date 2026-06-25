@@ -11,12 +11,10 @@ jobs:
   code-governance:
     runs-on: ubuntu-latest
     steps:
-      # 1. سحب الكود
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # مهمة جداً عشان يقرأ تاريخ الـ commits كلها ويقيس عليها
+          fetch-depth: 0
 
-      # 2. تجهيز فلاتر
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -25,11 +23,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      # ----- المعيار 1: الـ Linting -----
       - name: 1. Check Code Linting
         run: flutter analyze
 
-      # ----- المعيار 2: تسمية الملفات snake_case -----
       - name: 2. Enforce Snake Case File Names
         run: |
           echo "Checking file naming conventions in lib/..."
@@ -42,14 +38,12 @@ jobs:
             echo "✅ All file names are strictly snake_case!"
           fi
 
-      # ----- المعيار 3: اختبار الـ Commits (لو فيه push) -----
       - name: 3. Validate Commit Messages
         uses: wagoid/commitlint-github-action@v5
         with:
           configFile: .commitlintrc.json
           failOnWarnings: false
 
-  # ----- المعيار 4: اختبار عنوان الـ PR (بيشتغل بس لو فتحتي PR) -----
   pr-title-check:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
