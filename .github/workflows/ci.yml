@@ -23,10 +23,15 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Set up Ruby and Install Fastlane
+        run: |
+          gem install bundler
+          gem install fastlane
+
       - name: Run Fastlane Compliance Lane
         run: |
           cd android
-          bundle exec fastlane compliance_check
+          fastlane compliance_check
 
       - name: 3. Validate Commit Messages
         uses: wagoid/commitlint-github-action@v5
