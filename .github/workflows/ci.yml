@@ -23,11 +23,13 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      # ----- 🚀 التعديل هنا: ضفنا sudo عشان نديله صلاحية الـ Admin -----
       - name: Set up Ruby and Install Fastlane
         run: |
-          gem install bundler
-          gem install fastlane
+          sudo gem install bundler
+          sudo gem install fastlane
 
+      # ----- تشغيل الـ Fastlane مباشرة -----
       - name: Run Fastlane Compliance Lane
         run: |
           cd android
