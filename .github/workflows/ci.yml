@@ -1,4 +1,4 @@
-name: Ecommerce Advanced CI
+name: Ecommerce Advanced CI with Fastlane
 
 on:
   push:
@@ -23,20 +23,10 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: 1. Check Code Linting
-        run: flutter analyze
-
-      - name: 2. Enforce Snake Case File Names
+      - name: Run Fastlane Compliance Lane
         run: |
-          echo "Checking file naming conventions in lib/..."
-          invalid_files=$(find lib -name "*[A-Z]*" -name "*.dart" 2>/dev/null)
-          if [ ! -z "$invalid_files" ]; then
-            echo "❌ ERROR: File names must be snake_case (lowercase with underscores). Fix these:"
-            echo "$invalid_files"
-            exit 1
-          else
-            echo "✅ All file names are strictly snake_case!"
-          fi
+          cd android
+          bundle exec fastlane compliance_check
 
       - name: 3. Validate Commit Messages
         uses: wagoid/commitlint-github-action@v5
